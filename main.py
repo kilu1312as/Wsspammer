@@ -1,47 +1,42 @@
-import pyautogui as pag
-import keyboard
-import pyperclip
-import openpyxl as opx
-from time import sleep as sl
-from datetime import datetime
+import multiprocessing as mlti
+import sys
+from PyQt5 import QtWidgets
+from PyQt5.QtCore import Qt, pyqtSignal, QThread, QObject, QRunnable, QThreadPool, pyqtSlot
+from PyQt5.QtWidgets import QInputDialog, QApplication
+from PyQt5 import QtWidgets, uic, QtCore, QtGui
 
-WORKBOOK_PATH = 'D:\python\spamer\контакты.xlsx'  # Путь к вашей базе которую вы импортировали в эмулятор , но лучше
-# чтобы база и скрипт были в одной папке
-workbook = opx.load_workbook(WORKBOOK_PATH)
+from Wsspammer.spam import UI2
 
-first_sheet = workbook.worksheets[0]
+from Wsspammer.settigs import UI1
 
-'''
-pos = pag.position()
-print(pos)
-'''
 
-how_many = 0
-start_time = datetime.now()
+class WorkerGUI(QRunnable):
+    def __init__(self, InFunc):
+        super(WorkerGUI, self).__init__()
+        self.Func = InFunc
 
-for row in first_sheet.rows:
-    phone = row[1].value  # Телефон
-    name = row[0].value  # Название
+    @pyqtSlot()
+    def run(self):
+        self.Func()
 
-    sl(1)
 
-    # speach = f"Здравствуйте , на насчёт объявления '{name}' , ещё актуально ?"  # Спич
-    speach = 'Можно доп. фото ?'
-    pyperclip.copy(phone)
+def Process1():
+    MainThred = QApplication([])
+    SettingsGui = UI1()
+    SettingsGui.show()
+    sys.exit(MainThred.exec_())
 
-    pag.click(x=1832, y=82, interval=2)  # Поиск по контакту , 1 значение
-    keyboard.press_and_release('ctrl+v')  # Вставляем номер
-    sl(1)
 
-    pag.click(x=1250, y=193, interval=2)  # Входим в личку , 2 значение
-    sl(1)
+def Process2():
+    MainThred = QApplication([])
+    SpamGUI = UI2()
+    SpamGUI.show()
+    sys.exit(MainThred.exec_())
 
-    pyperclip.copy(speach)  # Копируем спич
-    keyboard.press_and_release('ctrl+v')  # Вставляем спич
-    sl(1)
-    keyboard.press_and_release('enter')
-    sl(1)
 
-    pag.click(x=1032, y=84, interval=2)  # Выход с лички , 3 значение
-    how_many += 1
-    print(f'Кол-во сообщений: {how_many}\nПрошло времени: {datetime.now() - start_time}')
+if __name__ == "__main__":
+    multiprcess1 = mlti.Process(target=Process1)
+    multiprcess2 = mlti.Process(target=Process2)
+
+    multiprcess1.start()
+    multiprcess2.start()
